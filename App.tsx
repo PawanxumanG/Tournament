@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppData, UserProfile, Tournament, JoinedHistory } from './types.ts';
 import { fetchAppData } from './services/dataService.ts';
@@ -19,14 +18,30 @@ export default function App() {
 
   useEffect(() => {
     const loadData = async () => {
-      const appData = await fetchAppData();
-      setData(appData);
+      try {
+        const appData = await fetchAppData();
+        setData(appData);
 
-      const savedProfile = localStorage.getItem('UserProfile');
-      if (savedProfile) setUserProfile(JSON.parse(savedProfile));
+        const savedProfile = localStorage.getItem('UserProfile');
+        if (savedProfile) {
+          try {
+            setUserProfile(JSON.parse(savedProfile));
+          } catch (e) {
+            localStorage.removeItem('UserProfile');
+          }
+        }
 
-      const savedHistory = localStorage.getItem('JoinedHistory');
-      if (savedHistory) setHistory(JSON.parse(savedHistory));
+        const savedHistory = localStorage.getItem('JoinedHistory');
+        if (savedHistory) {
+          try {
+            setHistory(JSON.parse(savedHistory));
+          } catch (e) {
+            localStorage.removeItem('JoinedHistory');
+          }
+        }
+      } catch (err) {
+        console.error("Critical app load error:", err);
+      }
     };
     loadData();
   }, []);
