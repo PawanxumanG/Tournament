@@ -15,21 +15,21 @@
   },
   "tournaments": [
     {
-      "id": "t1767198112553",
-      "title": "Pawan ponnam",
-      "type": "Solo",
-      "entryFee": 0,
-      "prizePool": 0,
-      "date": "2025-12-31",
-      "time": "18:00",
+      "id": "t1",
+      "title": "Num ",
+      "type": "Squad",
+      "entryFee": 1009,
+      "prizePool": 5000,
+      "date": "2024-06-25",
+      "time": "19:00",
       "totalSlots": 48,
-      "joinedSlots": 0,
+      "joinedSlots": 32,
       "map": "Bermuda",
-      "rules": "Standard rules apply."
+      "rules": "1. No hacks allowed. 2. Mobile only. 3. Reach 10 min before start."
     },
     {
       "id": "t2",
-      "title": "Solo Rush Night",
+      "title": "Ravan ",
       "type": "Solo",
       "entryFee": 30,
       "prizePool": 1200,
