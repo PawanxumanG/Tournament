@@ -1,17 +1,12 @@
-
 import { AppData } from '../types.ts';
 import { MOCK_DATA } from '../constants.ts';
 import { getGitHubConfig } from './githubService.ts';
 
 export const fetchAppData = async (): Promise<AppData> => {
   try {
-    // Determine the base path for relative fetches
-    const pathParts = window.location.pathname.split('/');
-    const isSubfolder = pathParts.length > 2;
-    const jsonPath = isSubfolder ? `./tournaments.json` : 'tournaments.json';
-
-    // 1. Fetch local tournaments.json
-    const localRes = await fetch(jsonPath);
+    // 1. Fetch local tournaments.json relative to the current script
+    // Browsers resolve 'tournaments.json' relative to the HTML location
+    const localRes = await fetch('tournaments.json');
     if (localRes.ok) return await localRes.json();
     
     // 2. Try fetching from the configured GitHub repository
