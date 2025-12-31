@@ -20,6 +20,7 @@ export interface Tournament {
   joinedSlots: number;
   rules: string;
   map: string;
+  aiAnalysis?: string;
 }
 
 export interface AppConfig {
@@ -45,4 +46,5 @@ export interface JoinedHistory {
   entryFee: number;
   status: 'Pending' | 'Confirmed';
   joinedAt: number;
+  screenshotVerified?: boolean;
 }

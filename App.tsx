@@ -1,23 +1,23 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppData, UserProfile, Tournament, JoinedHistory } from './types';
 import { fetchAppData } from './services/dataService';
 import { Onboarding } from './components/Onboarding';
 import { TournamentCard } from './components/TournamentCard';
 import { RegistrationModal } from './components/RegistrationModal';
 import { AdminPanel } from './components/AdminPanel';
-import { LayoutGrid, History, Shield, Trophy, ChevronRight } from 'lucide-react';
+import { AIScout } from './components/AIScout';
+import { LayoutGrid, History, Shield, Trophy, User } from 'lucide-react';
 
 export default function App() {
   const [data, setData] = useState<AppData | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [history, setHistory] = useState<JoinedHistory[]>([]);
-  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'admin'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'profile'>('home');
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
 
-  // Load Initial State
   useEffect(() => {
     const loadData = async () => {
       const appData = await fetchAppData();
@@ -32,7 +32,6 @@ export default function App() {
     loadData();
   }, []);
 
-  // Banner Auto-Slide
   useEffect(() => {
     if (data?.config.banners.length) {
       const timer = setInterval(() => {
@@ -66,18 +65,16 @@ export default function App() {
     setActiveTab('history');
   };
 
-  const handleAdminUpdate = (newData: AppData) => {
-    setData(newData);
-    // Note: This only updates local state. 
-    // Users must export JSON and update GitHub for persistent change.
-  };
-
   if (!data) {
     return (
       <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#ff4d00] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="font-russo text-gray-500 tracking-widest uppercase">Initializing Hub...</p>
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-[#ff4d00]/20 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-[#ff4d00] border-t-transparent rounded-full animate-spin"></div>
+            <Trophy className="absolute inset-0 m-auto w-6 h-6 text-[#ff4d00]" />
+          </div>
+          <p className="font-russo text-white tracking-widest uppercase animate-pulse">Syncing Hub...</p>
         </div>
       </div>
     );
@@ -88,68 +85,85 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pb-24 text-white">
-      {/* App Header */}
-      <header className="sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-md px-5 py-4 flex justify-between items-center border-b border-white/5">
+    <div className="min-h-screen bg-[#0a0a0a] pb-24 text-white overflow-x-hidden">
+      <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-5 py-4 flex justify-between items-center border-b border-white/5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#ff4d00] rounded-xl flex items-center justify-center shadow-lg shadow-[#ff4d00]/20">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#ff4d00] to-[#ff8000] rounded-xl flex items-center justify-center shadow-lg shadow-[#ff4d00]/30 transform -rotate-3 hover:rotate-0 transition-transform cursor-pointer" onClick={() => setActiveTab('home')}>
             <Trophy className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-russo tracking-tight leading-none">FF HUB</h1>
-            <p className="text-[10px] text-gray-500 uppercase font-bold">Elite Esports</p>
+            <h1 className="text-lg font-russo tracking-tight leading-none text-white">FF HUB</h1>
+            <p className="text-[10px] text-[#ff4d00] uppercase font-bold tracking-tighter">Premier Series</p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-bold text-gray-400 leading-none mb-1">{userProfile.ign}</p>
-          <div className="flex items-center gap-1.5 justify-end">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-            <p className="text-[10px] text-green-500 font-bold uppercase">Online</p>
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-xs font-bold text-gray-400 leading-none mb-1">{userProfile.ign}</p>
+            <p className="text-[10px] text-green-500 font-bold uppercase">LVL {userProfile.level}</p>
           </div>
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center ${activeTab === 'profile' ? 'border-[#ff4d00] bg-[#ff4d00]/10' : 'border-white/10 bg-white/5'}`}
+          >
+            <User className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="px-5 pt-6">
+      <main className="px-5 pt-6 max-w-lg mx-auto">
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            {/* Banner Slider */}
-            <div className="relative h-44 rounded-2xl overflow-hidden glass border border-white/5 shadow-2xl">
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="relative h-48 rounded-2xl overflow-hidden glass border border-white/10 shadow-2xl group">
               {data.config.banners.map((url, idx) => (
                 <div 
                   key={idx}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${currentBanner === idx ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute inset-0 transition-all duration-1000 transform ${currentBanner === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
                 >
                   <img src={url} alt="Banner" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-4 left-5">
-                    <h2 className="text-xl font-russo text-white leading-tight">PREMIUM<br/>TOURNAMENTS</h2>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+                  <div className="absolute bottom-5 left-5">
+                    <span className="text-[10px] font-bold text-[#ff4d00] bg-[#ff4d00]/10 px-2 py-0.5 rounded border border-[#ff4d00]/30 uppercase mb-2 inline-block">Pro Series</span>
+                    <h2 className="text-2xl font-russo text-white leading-tight">MASTER THE<br/>BATTLEGROUND</h2>
                   </div>
                 </div>
               ))}
-              <div className="absolute bottom-4 right-5 flex gap-1.5">
+              <div className="absolute bottom-5 right-5 flex gap-1.5">
                 {data.config.banners.map((_, idx) => (
-                  <div key={idx} className={`w-1.5 h-1.5 rounded-full ${currentBanner === idx ? 'bg-[#ff4d00]' : 'bg-white/30'}`} />
+                  <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${currentBanner === idx ? 'bg-[#ff4d00] w-4' : 'bg-white/30'}`} />
                 ))}
               </div>
             </div>
 
-            {/* Tournaments Grid */}
             <div className="space-y-4">
-              <div className="flex justify-between items-end mb-2">
-                <h2 className="font-russo text-lg text-white">Live Matches</h2>
-                <span className="text-[10px] uppercase font-bold text-[#ff4d00]">Refresh for new slots</span>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="font-russo text-lg text-white flex items-center gap-2">
+                  Live Matches
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                </h2>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="text-[10px] uppercase font-bold text-[#ff4d00] hover:underline"
+                >
+                  Refresh Slots
+                </button>
               </div>
+              
               {data.tournaments.map(tournament => (
-                <TournamentCard 
-                  key={tournament.id} 
-                  tournament={tournament} 
-                  onJoin={setSelectedTournament} 
-                />
+                <div key={tournament.id}>
+                  <TournamentCard 
+                    tournament={tournament} 
+                    onJoin={setSelectedTournament} 
+                  />
+                  {/* Show AI strategy for selected or first few matches */}
+                  {data.tournaments[0]?.id === tournament.id && (
+                    <AIScout map={tournament.map} mode={tournament.type} />
+                  )}
+                </div>
               ))}
+              
               {data.tournaments.length === 0 && (
-                <div className="glass p-10 rounded-3xl text-center">
-                  <p className="text-gray-500 uppercase font-bold text-sm">No Live Tournaments Found</p>
+                <div className="glass p-12 rounded-3xl text-center border-dashed border-2 border-white/5">
+                  <p className="text-gray-500 uppercase font-russo text-sm">Waiting for new drops...</p>
                 </div>
               )}
             </div>
@@ -157,78 +171,122 @@ export default function App() {
         )}
 
         {activeTab === 'history' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in duration-500">
              <div className="flex justify-between items-end mb-2">
-                <h2 className="font-russo text-lg text-white">Joined Matches</h2>
-                <span className="text-[10px] uppercase font-bold text-gray-500">History</span>
+                <h2 className="font-russo text-lg text-white">Battle History</h2>
+                <span className="text-[10px] uppercase font-bold text-gray-500">{history.length} Matches</span>
             </div>
             {history.length > 0 ? (
               <div className="space-y-4">
                 {history.map((entry, idx) => (
-                  <div key={idx} className="glass p-5 rounded-2xl border border-white/5 flex justify-between items-center">
-                    <div>
-                      <h4 className="font-russo text-white">{entry.tournamentTitle}</h4>
-                      <p className="text-xs text-gray-500">{entry.date}</p>
+                  <div key={idx} className="glass p-5 rounded-2xl border border-white/5 flex justify-between items-center group hover:bg-white/[0.07] transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-russo text-xl ${entry.status === 'Confirmed' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                        {entry.status[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-russo text-white group-hover:text-[#ff4d00] transition-colors">{entry.tournamentTitle}</h4>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-tighter">{entry.date} • ₹{entry.entryFee}</p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase ${
+                      <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-widest ${
                         entry.status === 'Confirmed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
                       }`}>
                         {entry.status}
                       </span>
-                      <p className="text-xs font-bold mt-1">₹{entry.entryFee}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="glass py-12 px-8 rounded-3xl text-center space-y-4">
-                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+              <div className="glass py-20 px-8 rounded-3xl text-center space-y-4 border border-white/5">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                   <History className="w-8 h-8 text-gray-600" />
                 </div>
-                <p className="text-gray-500 uppercase font-bold text-sm">You haven't joined any matches yet.</p>
+                <h3 className="font-russo text-lg">No Battles Recorded</h3>
+                <p className="text-gray-500 text-xs max-w-[200px] mx-auto">Your journey starts here. Join your first match and dominate the arena.</p>
                 <button 
                   onClick={() => setActiveTab('home')}
-                  className="bg-white/10 text-white px-6 py-3 rounded-xl font-russo text-xs"
+                  className="bg-[#ff4d00] text-white px-8 py-3 rounded-xl font-russo text-xs shadow-lg shadow-[#ff4d00]/20 active:scale-95 transition-all"
                 >
-                  Explore Tournaments
+                  Join Match
                 </button>
               </div>
             )}
           </div>
         )}
+
+        {activeTab === 'profile' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+             <div className="flex justify-between items-end mb-2">
+                <h2 className="font-russo text-lg text-white">Player Profile</h2>
+                <button 
+                  onClick={() => setShowAdmin(true)}
+                  className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-white"
+                >
+                  <Shield className="w-5 h-5" />
+                </button>
+            </div>
+            
+            <div className="glass p-8 rounded-3xl text-center border border-white/10 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff4d00]/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+               <div className="w-24 h-24 bg-gradient-to-br from-gray-800 to-black rounded-3xl mx-auto mb-4 flex items-center justify-center border-2 border-white/10 shadow-2xl">
+                  <User className="w-12 h-12 text-[#ff4d00]" />
+               </div>
+               <h3 className="text-xl font-russo">{userProfile.ign}</h3>
+               <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mb-6">Level {userProfile.level} • Pro Elite</p>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">UID</p>
+                    <p className="font-russo text-white">{userProfile.uid}</p>
+                 </div>
+                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Wins</p>
+                    <p className="font-russo text-green-500">0</p>
+                 </div>
+               </div>
+               
+               <button 
+                onClick={() => {
+                  if (confirm('Logging out will reset your profile. Continue?')) {
+                    localStorage.removeItem('UserProfile');
+                    window.location.reload();
+                  }
+                }}
+                className="mt-8 text-xs text-red-500 font-bold uppercase hover:underline"
+               >
+                 Reset Profile
+               </button>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 px-6 py-3 pb-8">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-2xl border-t border-white/5 px-8 py-3 pb-8">
         <div className="max-w-md mx-auto flex justify-between items-center">
-          <button 
-            onClick={() => setActiveTab('home')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-[#ff4d00] scale-110' : 'text-gray-500'}`}
-          >
-            <LayoutGrid className="w-6 h-6" />
-            <span className="text-[10px] font-bold uppercase">Tourney</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('history')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'history' ? 'text-[#ff4d00] scale-110' : 'text-gray-500'}`}
-          >
-            <History className="w-6 h-6" />
-            <span className="text-[10px] font-bold uppercase">Joined</span>
-          </button>
-
-          <button 
-            onClick={() => setShowAdmin(true)}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-white"
-          >
-            <Shield className="w-6 h-6" />
-            <span className="text-[10px] font-bold uppercase">Admin</span>
-          </button>
+          {[
+            { id: 'home', icon: LayoutGrid, label: 'Arena' },
+            { id: 'history', icon: History, label: 'Vault' },
+            { id: 'profile', icon: User, label: 'Profile' }
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex flex-col items-center gap-1 transition-all group ${activeTab === tab.id ? 'text-[#ff4d00] scale-110' : 'text-gray-500'}`}
+            >
+              <div className={`p-1.5 rounded-lg transition-colors ${activeTab === tab.id ? 'bg-[#ff4d00]/10' : 'group-hover:bg-white/5'}`}>
+                <tab.icon className="w-6 h-6" />
+              </div>
+              <span className={`text-[10px] font-bold uppercase tracking-tighter ${activeTab === tab.id ? 'opacity-100' : 'opacity-40'}`}>
+                {tab.label}
+              </span>
+            </button>
+          ))}
         </div>
       </nav>
 
-      {/* Modals */}
       {selectedTournament && (
         <RegistrationModal 
           tournament={selectedTournament}
@@ -242,7 +300,7 @@ export default function App() {
       {showAdmin && (
         <AdminPanel 
           initialData={data}
-          onUpdate={handleAdminUpdate}
+          onUpdate={setData}
           onClose={() => setShowAdmin(false)}
         />
       )}
