@@ -2,30 +2,34 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 
+// Immediate loader dismissal logic
+const hideLoader = () => {
+  const loader = document.getElementById('fallback-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    setTimeout(() => {
+      loader.style.display = 'none';
+    }, 500);
+  }
+};
+
 const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
+  
+  // Mount first
   root.render(
     <React.StrictMode>
       <App />
     </React.StrictMode>
   );
 
-  // Remove fallback loader once React starts rendering
-  const hideLoader = () => {
-    const loader = document.getElementById('fallback-loader');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => {
-        loader.style.display = 'none';
-      }, 500);
-    }
-  };
-
-  // Give React a moment to paint the first frame
+  // Then hide loader
   if (document.readyState === 'complete') {
-    setTimeout(hideLoader, 300);
+    hideLoader();
   } else {
-    window.addEventListener('load', () => setTimeout(hideLoader, 300));
+    window.addEventListener('load', hideLoader);
+    // Backup trigger in case load event already passed
+    setTimeout(hideLoader, 1000);
   }
 }
