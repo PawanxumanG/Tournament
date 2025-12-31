@@ -5,8 +5,13 @@ import { getGitHubConfig } from './githubService.ts';
 
 export const fetchAppData = async (): Promise<AppData> => {
   try {
-    // 1. Fetch using relative path to handle subdirectory hosting
-    const localRes = await fetch('./tournaments.json');
+    // Determine the base path for relative fetches
+    const pathParts = window.location.pathname.split('/');
+    const isSubfolder = pathParts.length > 2;
+    const jsonPath = isSubfolder ? `./tournaments.json` : 'tournaments.json';
+
+    // 1. Fetch local tournaments.json
+    const localRes = await fetch(jsonPath);
     if (localRes.ok) return await localRes.json();
     
     // 2. Try fetching from the configured GitHub repository
