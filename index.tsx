@@ -15,6 +15,9 @@ const dismissLoader = () => {
   }
 };
 
+// CRITICAL: Dismiss as soon as JS reaches this point
+dismissLoader();
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
@@ -25,12 +28,6 @@ if (rootElement) {
         <App />
       </React.StrictMode>
     );
-    
-    // Call dismissal immediately to get the loader out of the way
-    dismissLoader();
-    
-    // Safety check for complex loading scenarios
-    window.addEventListener('load', dismissLoader);
   } catch (err: any) {
     console.error("Critical Render Error:", err);
     const errBox = document.getElementById('error-display');
@@ -40,3 +37,7 @@ if (rootElement) {
     }
   }
 }
+
+// Global safety catch
+window.addEventListener('load', dismissLoader);
+setTimeout(dismissLoader, 3000);
