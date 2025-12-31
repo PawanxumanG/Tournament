@@ -1,8 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Tournament, UserProfile, AppConfig } from '../types.ts';
-import { X, CheckCircle2, ChevronRight, MessageCircle, Upload, Loader2, AlertCircle } from 'lucide-react';
-import { verifyPaymentScreenshot } from '../services/geminiService.ts';
+import { X, ChevronRight, MessageCircle, Upload, AlertCircle } from 'lucide-react';
 
 interface Props {
   tournament: Tournament;
@@ -15,28 +14,20 @@ interface Props {
 export const RegistrationModal: React.FC<Props> = ({ tournament, userProfile, config, onClose, onComplete }) => {
   const [step, setStep] = useState(1);
   const [editedProfile, setEditedProfile] = useState(userProfile);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [aiFeedback, setAiFeedback] = useState<{is_valid: boolean, message: string} | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const upiLink = `upi://pay?pa=${config.upiId}&pn=FF_Hub&am=${tournament.entryFee}&cu=INR`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = async () => {
+    reader.onloadend = () => {
       const base64 = reader.result as string;
       setPreviewUrl(base64);
-      setIsVerifying(true);
-      setAiFeedback(null);
-      
-      const feedback = await verifyPaymentScreenshot(base64, tournament.entryFee);
-      setAiFeedback(feedback);
-      setIsVerifying(false);
     };
     reader.readAsDataURL(file);
   };
@@ -48,9 +39,7 @@ export const RegistrationModal: React.FC<Props> = ({ tournament, userProfile, co
       `UID: ${editedProfile.uid}\n` +
       `Match: ${tournament.title}\n` +
       `Fee Paid: ₹${tournament.entryFee}\n\n` +
-      `AI Verification Status: ${aiFeedback?.is_valid ? '✅ VERIFIED' : '❌ PENDING'}\n` +
-      `Verification Message: ${aiFeedback?.message || 'Manual Check'}\n\n` +
-      `I have paid the entry fee. Please confirm my slot.`;
+      `I have paid the entry fee and attached the screenshot. Please confirm my slot.`;
     
     const url = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -164,7 +153,7 @@ export const RegistrationModal: React.FC<Props> = ({ tournament, userProfile, co
               </div>
 
               <div className="space-y-4">
-                <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Verification</p>
+                <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Payment Proof</p>
                 
                 {!previewUrl ? (
                   <button 
@@ -190,40 +179,15 @@ export const RegistrationModal: React.FC<Props> = ({ tournament, userProfile, co
                     >
                       <X className="w-4 h-4" />
                     </button>
-                    
-                    {isVerifying && (
-                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-8 h-8 text-[#ff4d00] animate-spin" />
-                        <span className="text-xs font-russo uppercase tracking-widest">AI Verifying...</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {aiFeedback && (
-                  <div className={`p-4 rounded-xl border flex items-start gap-3 text-left animate-in zoom-in-95 ${
-                    aiFeedback.is_valid ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'
-                  }`}>
-                    {aiFeedback.is_valid ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                       <p className={`text-xs font-bold uppercase ${aiFeedback.is_valid ? 'text-green-500' : 'text-red-500'}`}>
-                        {aiFeedback.is_valid ? 'Payment Validated' : 'Validation Error'}
-                      </p>
-                      <p className="text-[10px] text-gray-400 mt-1">{aiFeedback.message}</p>
-                    </div>
                   </div>
                 )}
               </div>
 
               <button 
                 onClick={handleWhatsApp}
-                disabled={!previewUrl || isVerifying}
+                disabled={!previewUrl}
                 className={`w-full py-4 rounded-xl font-russo flex items-center justify-center gap-2 transition-all ${
-                  !previewUrl || isVerifying 
+                  !previewUrl 
                   ? 'bg-gray-800 text-gray-500 cursor-not-allowed' 
                   : 'bg-[#25D366] text-white hover:brightness-110 active:scale-95 shadow-lg shadow-green-500/20'
                 }`}

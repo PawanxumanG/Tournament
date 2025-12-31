@@ -20,7 +20,6 @@ export interface Tournament {
   joinedSlots: number;
   rules: string;
   map: string;
-  aiAnalysis?: string;
 }
 
 export interface AppConfig {
