@@ -1,3 +1,4 @@
+
 {
   "config": {
     "upiId": "pawanponnam-1@okicici",
@@ -16,9 +17,9 @@
   "tournaments": [
     {
       "id": "t1",
-      "title": "Pawan",
+      "title": "Diamond Cup - Season 1",
       "type": "Squad",
-      "entryFee": 1009,
+      "entryFee": 100,
       "prizePool": 5000,
       "date": "2024-06-25",
       "time": "19:00",
@@ -29,7 +30,7 @@
     },
     {
       "id": "t2",
-      "title": "Ravan  ",
+      "title": "Solo Rush Night",
       "type": "Solo",
       "entryFee": 30,
       "prizePool": 1200,
