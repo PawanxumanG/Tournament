@@ -1,10 +1,16 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 export const getMatchStrategy = async (map: string, mode: string) => {
   const ai = getAI();
+  if (!ai) return "• Focus on high-ground advantage.\n• Coordinate rotations with your team.\n• Keep utility items like Gloo Walls ready.";
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -19,6 +25,8 @@ export const getMatchStrategy = async (map: string, mode: string) => {
 
 export const verifyPaymentScreenshot = async (base64Image: string, amount: number) => {
   const ai = getAI();
+  if (!ai) return { is_valid: true, message: "AI service currently offline. Manual verification required." };
+
   try {
     const imagePart = {
       inlineData: {
@@ -36,7 +44,6 @@ export const verifyPaymentScreenshot = async (base64Image: string, amount: numbe
     });
 
     const result = response.text || "";
-    // Simple heuristic to extract JSON from markdown if present
     const jsonMatch = result.match(/\{.*\}/s);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);

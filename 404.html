@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Free Fire Tournament Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>window.process = { env: {} };</script>
+    <script>
+      window.process = { env: { NODE_ENV: 'production', API_KEY: '' } };
+    </script>
     <script type="importmap">
     {
       "imports": {
@@ -22,6 +24,8 @@
 <body style="background: #0a0a0a; color: white;">
     <div id="root"></div>
     <script type="module" src="https://esm.sh/run"></script>
-    <script type="text/babel" src="./index.tsx"></script>
+    <script type="text/tsx">
+      import './index.tsx';
+    </script>
 </body>
 </html>

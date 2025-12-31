@@ -56,9 +56,14 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script>
-      window.process = { env: { NODE_ENV: 'production' } };
+      // Crucial: define process.env BEFORE any modules load
+      window.process = { 
+        env: { 
+          NODE_ENV: 'production',
+          API_KEY: '' // Placeholder to prevent crash
+        } 
+      };
       
-      // Captures errors that happen before the app can even start
       window.onerror = function(msg, url, line, col, error) {
         const display = document.getElementById('error-display');
         if (display) {
@@ -94,36 +99,9 @@
 
     <div id="root"></div>
     
-    <!-- Using esm.sh/run for reliable TSX transpilation -->
     <script type="module" src="https://esm.sh/run"></script>
-    
-    <!-- Entry point embedded in HTML to prevent 404/loading issues on mobile -->
     <script type="text/tsx">
-      import React from 'react';
-      import ReactDOM from 'react-dom/client';
-      import App from './App.tsx';
-
-      const mount = () => {
-        const rootContainer = document.getElementById('root');
-        if (rootContainer) {
-          const root = ReactDOM.createRoot(rootContainer);
-          root.render(<App />);
-          
-          // Clear loader when React starts
-          const loader = document.getElementById('fallback-loader');
-          if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-          }
-        }
-      };
-
-      // Ensure DOM is ready before mounting
-      if (document.readyState === 'complete') {
-        mount();
-      } else {
-        window.addEventListener('load', mount);
-      }
+      import './index.tsx';
     </script>
 </body>
 </html>
