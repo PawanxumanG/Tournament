@@ -4,12 +4,11 @@ import { getGitHubConfig } from './githubService.ts';
 
 export const fetchAppData = async (): Promise<AppData> => {
   try {
-    // 1. Fetch local tournaments.json relative to the current script
-    // Browsers resolve 'tournaments.json' relative to the HTML location
-    const localRes = await fetch('tournaments.json');
+    // Force cache refresh to ensure users don't see old tournaments
+    const localRes = await fetch('./tournaments.json', { cache: 'no-cache' });
     if (localRes.ok) return await localRes.json();
     
-    // 2. Try fetching from the configured GitHub repository
+    // Try fetching from the configured GitHub repository
     const ghConfig = getGitHubConfig();
     if (ghConfig && ghConfig.owner && ghConfig.repo) {
       const githubUrl = `https://raw.githubusercontent.com/${ghConfig.owner}/${ghConfig.repo}/${ghConfig.branch}/${ghConfig.path}`;
@@ -19,7 +18,7 @@ export const fetchAppData = async (): Promise<AppData> => {
     
     return MOCK_DATA;
   } catch (error) {
-    console.error('Data sync failed:', error);
+    console.warn('Sync failed, using defaults:', error);
     return MOCK_DATA;
   }
 };

@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 
 /**
- * Dismisses the initialization overlay with a smooth fade
+ * Ensures the initialization screen is removed smoothly
  */
-const hideInitializationOverlay = () => {
+const dismissLoader = () => {
   const loader = document.getElementById('fallback-loader');
   if (loader && loader.style.display !== 'none') {
     loader.style.opacity = '0';
@@ -26,23 +26,22 @@ if (rootElement) {
       </React.StrictMode>
     );
     
-    // Attempt to hide loader as soon as React starts rendering
-    hideInitializationOverlay();
+    // Dismiss as soon as JS execution reaches this point
+    dismissLoader();
     
-    // Failsafe triggers for hiding the loader
+    // Fallback dismissals for slow network conditions
     if (document.readyState === 'complete') {
-      hideInitializationOverlay();
+      dismissLoader();
     } else {
-      window.addEventListener('load', hideInitializationOverlay);
-      // Absolute maximum wait time
-      setTimeout(hideInitializationOverlay, 3000);
+      window.addEventListener('load', dismissLoader);
+      setTimeout(dismissLoader, 2000); // Absolute safety timeout
     }
   } catch (err: any) {
-    console.error("Critical Render Failure:", err);
-    const errorBox = document.getElementById('error-display');
-    if (errorBox) {
-      errorBox.style.display = 'block';
-      errorBox.textContent = `RENDER ERROR: ${err.message || 'Unknown'}`;
+    console.error("Critical boot error:", err);
+    const errDisplay = document.getElementById('error-display');
+    if (errDisplay) {
+      errDisplay.style.display = 'block';
+      errDisplay.textContent = "MOUNTING ERROR: " + err.message;
     }
   }
 }
