@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { AppData, Tournament } from '../types';
-import { ADMIN_PASSCODE } from '../constants';
-import { Lock, Save, Plus, Trash2, Copy, Check, LogOut, Image as ImageIcon, Settings, List } from 'lucide-react';
+import { AppData, Tournament } from '../types.ts';
+import { ADMIN_PASSCODE } from '../constants.ts';
+import { Lock, Save, Plus, Trash2, Copy, Check, LogOut, Settings, List } from 'lucide-react';
 
 interface Props {
   initialData: AppData;
@@ -103,7 +103,6 @@ export const AdminPanel: React.FC<Props> = ({ initialData, onUpdate, onClose }) 
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col h-full">
-      {/* Admin Header */}
       <div className="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center shrink-0">
         <div>
           <h2 className="font-russo text-[#ff4d00]">Admin Console</h2>
@@ -119,7 +118,6 @@ export const AdminPanel: React.FC<Props> = ({ initialData, onUpdate, onClose }) 
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-white/10 shrink-0">
         {[
           { id: 'tournaments', label: 'Matches', icon: List },
@@ -139,7 +137,6 @@ export const AdminPanel: React.FC<Props> = ({ initialData, onUpdate, onClose }) 
         ))}
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 pb-20">
         {activeTab === 'tournaments' && (
           <div className="space-y-4">

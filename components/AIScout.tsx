@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Target, Map as MapIcon, Zap } from 'lucide-react';
-import { getMatchStrategy } from '../services/geminiService';
+import { Sparkles, Loader2, Map as MapIcon, Zap } from 'lucide-react';
+import { getMatchStrategy } from '../services/geminiService.ts';
 
 interface Props {
   map: string;

@@ -1,8 +1,8 @@
 
 import React, { useState, useRef } from 'react';
-import { Tournament, UserProfile, AppConfig } from '../types';
+import { Tournament, UserProfile, AppConfig } from '../types.ts';
 import { X, CheckCircle2, ChevronRight, MessageCircle, Upload, Loader2, AlertCircle } from 'lucide-react';
-import { verifyPaymentScreenshot } from '../services/geminiService';
+import { verifyPaymentScreenshot } from '../services/geminiService.ts';
 
 interface Props {
   tournament: Tournament;

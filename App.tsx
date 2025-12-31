@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppData, UserProfile, Tournament, JoinedHistory } from './types';
-import { fetchAppData } from './services/dataService';
-import { Onboarding } from './components/Onboarding';
-import { TournamentCard } from './components/TournamentCard';
-import { RegistrationModal } from './components/RegistrationModal';
-import { AdminPanel } from './components/AdminPanel';
-import { AIScout } from './components/AIScout';
+import { AppData, UserProfile, Tournament, JoinedHistory } from './types.ts';
+import { fetchAppData } from './services/dataService.ts';
+import { Onboarding } from './components/Onboarding.tsx';
+import { TournamentCard } from './components/TournamentCard.tsx';
+import { RegistrationModal } from './components/RegistrationModal.tsx';
+import { AdminPanel } from './components/AdminPanel.tsx';
+import { AIScout } from './components/AIScout.tsx';
 import { LayoutGrid, History, Shield, Trophy, User } from 'lucide-react';
 
 export default function App() {
@@ -154,7 +154,7 @@ export default function App() {
                     tournament={tournament} 
                     onJoin={setSelectedTournament} 
                   />
-                  {/* Show AI strategy for selected or first few matches */}
+                  {/* Show AI strategy for first match as highlight */}
                   {data.tournaments[0]?.id === tournament.id && (
                     <AIScout map={tournament.map} mode={tournament.type} />
                   )}
