@@ -2,45 +2,47 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 
-// Faster loader dismissal
-const dismissLoader = () => {
+/**
+ * Dismisses the initialization overlay with a smooth fade
+ */
+const hideInitializationOverlay = () => {
   const loader = document.getElementById('fallback-loader');
-  if (loader) {
+  if (loader && loader.style.display !== 'none') {
     loader.style.opacity = '0';
     setTimeout(() => {
       loader.style.display = 'none';
-    }, 400);
+    }, 500);
   }
 };
 
 const rootElement = document.getElementById('root');
+
 if (rootElement) {
   try {
     const root = ReactDOM.createRoot(rootElement);
-    
-    // We render first, then dismiss. If render fails, dismissal won't happen 
-    // but our global error handler in index.html will catch it.
     root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
     
-    // Immediate dismissal on script execution
-    dismissLoader();
-
-    // Secondary cleanup
+    // Attempt to hide loader as soon as React starts rendering
+    hideInitializationOverlay();
+    
+    // Failsafe triggers for hiding the loader
     if (document.readyState === 'complete') {
-        dismissLoader();
+      hideInitializationOverlay();
     } else {
-        window.addEventListener('load', dismissLoader);
+      window.addEventListener('load', hideInitializationOverlay);
+      // Absolute maximum wait time
+      setTimeout(hideInitializationOverlay, 3000);
     }
   } catch (err: any) {
-    console.error("Mounting error:", err);
-    const display = document.getElementById('error-display');
-    if (display) {
-      display.style.display = 'block';
-      display.textContent = `REACT MOUNT ERROR: ${err.message || 'Check Console'}`;
+    console.error("Critical Render Failure:", err);
+    const errorBox = document.getElementById('error-display');
+    if (errorBox) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = `RENDER ERROR: ${err.message || 'Unknown'}`;
     }
   }
 }
