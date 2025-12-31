@@ -16,7 +16,7 @@
   "tournaments": [
     {
       "id": "t1",
-      "title": "Num ",
+      "title": "Pawanponnam",
       "type": "Squad",
       "entryFee": 1009,
       "prizePool": 5000,
@@ -29,7 +29,7 @@
     },
     {
       "id": "t2",
-      "title": "Ravan ",
+      "title": "Ravan  Chaman",
       "type": "Solo",
       "entryFee": 30,
       "prizePool": 1200,
