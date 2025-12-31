@@ -21,22 +21,11 @@
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
             user-select: none;
+            margin: 0;
         }
         h1, h2, h3, h4, .font-russo {
             font-family: 'Russo One', sans-serif;
             text-transform: uppercase;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* Hide scrollbars */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-        input, button {
-            outline: none !important;
         }
         #fallback-loader {
             position: fixed;
@@ -46,10 +35,46 @@
             justify-content: center;
             background: #0a0a0a;
             z-index: 9999;
+            flex-direction: column;
         }
+        #error-display {
+            display: none;
+            color: #ff4444;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 15px;
+            text-align: left;
+            max-width: 85%;
+            background: rgba(255,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.2);
+            border-radius: 12px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script>
-      window.process = { env: {} };
+      window.process = { env: { NODE_ENV: 'production' } };
+      
+      // Improved error catcher for mobile debugging
+      window.onerror = function(msg, url, line, col, error) {
+        const display = document.getElementById('error-display');
+        if (display) {
+          display.style.display = 'block';
+          const errorMsg = error ? error.stack : msg;
+          display.textContent = `CRITICAL ERROR:\n${errorMsg}\n\nURL: ${url}:${line}:${col}`;
+        }
+        return false;
+      };
+      
+      window.onunhandledrejection = function(event) {
+        const display = document.getElementById('error-display');
+        if (display) {
+          display.style.display = 'block';
+          display.textContent = `PROMISE ERROR:\n${event.reason}`;
+        }
+      };
     </script>
     <script type="importmap">
 {
@@ -68,30 +93,46 @@
 <body>
     <div id="fallback-loader">
         <div style="text-align: center;">
-            <div style="width: 40px; height: 40px; border: 3px solid rgba(255,77,0,0.2); border-top-color: #ff4d00; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-            <p style="font-family: 'Russo One'; font-size: 12px; color: #ff4d00; letter-spacing: 2px;">LOADING HUB...</p>
+            <div style="width: 45px; height: 45px; border: 4px solid rgba(255,77,0,0.1); border-top-color: #ff4d00; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="font-family: 'Russo One'; font-size: 14px; color: #ff4d00; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,77,0,0.3);">INITIALIZING HUB</p>
+            <p style="font-size: 10px; color: #555; margin-top: 10px; text-transform: uppercase;">Syncing Arena Data...</p>
         </div>
+        <div id="error-display"></div>
     </div>
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
     <div id="root"></div>
     
-    <!-- 
-      Using type="text/tsx" is the standard for esm.sh/run to handle transpilation 
-      when files are served as text/plain (as GitHub Pages does).
-    -->
-    <script type="text/tsx" src="./index.tsx"></script>
+    <!-- Load the esm.sh runner first -->
     <script type="module" src="https://esm.sh/run"></script>
+    
+    <!-- Use text/tsx which is the preferred type for esm.sh transpilation -->
+    <script type="text/tsx">
+      import './index.tsx';
+    </script>
 
     <script>
-      // Hide the fallback loader once the app is mounted
-      const observer = new MutationObserver((mutations) => {
-        if (document.getElementById('root').children.length > 0) {
-          document.getElementById('fallback-loader').style.display = 'none';
+      // Hide loader only when content actually appears in root
+      const root = document.getElementById('root');
+      const observer = new MutationObserver(() => {
+        if (root.children.length > 0) {
+          const loader = document.getElementById('fallback-loader');
+          loader.style.opacity = '0';
+          setTimeout(() => { loader.style.display = 'none'; }, 500);
           observer.disconnect();
         }
       });
-      observer.observe(document.getElementById('root'), { childList: true });
+      observer.observe(root, { childList: true, subtree: true });
+
+      // Safety timeout: If it takes more than 15 seconds, show a reset button
+      setTimeout(() => {
+        if (root.children.length === 0) {
+          const display = document.getElementById('error-display');
+          if (display && display.style.display === 'none') {
+            display.style.display = 'block';
+            display.innerHTML = 'Taking longer than usual... <br/><br/><button onclick="location.reload()" style="background:#ff4d00;color:white;padding:10px 20px;border:none;border-radius:8px;font-family:Russo One;font-size:12px">RELOAD HUB</button>';
+          }
+        }
+      }, 15000);
     </script>
 </body>
 </html>
