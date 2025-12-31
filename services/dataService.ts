@@ -3,22 +3,37 @@ import { MOCK_DATA } from '../constants.ts';
 import { getGitHubConfig } from './githubService.ts';
 
 export const fetchAppData = async (): Promise<AppData> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 second timeout
+
   try {
-    // Force cache refresh to ensure users don't see old tournaments
-    const localRes = await fetch('./tournaments.json', { cache: 'no-cache' });
-    if (localRes.ok) return await localRes.json();
+    // 1. Try local tournaments.json
+    const localRes = await fetch('./tournaments.json', { 
+      cache: 'no-cache',
+      signal: controller.signal 
+    });
     
-    // Try fetching from the configured GitHub repository
+    if (localRes.ok) {
+      clearTimeout(timeoutId);
+      return await localRes.json();
+    }
+    
+    // 2. Try GitHub sync if configured
     const ghConfig = getGitHubConfig();
     if (ghConfig && ghConfig.owner && ghConfig.repo) {
       const githubUrl = `https://raw.githubusercontent.com/${ghConfig.owner}/${ghConfig.repo}/${ghConfig.branch}/${ghConfig.path}`;
-      const githubRes = await fetch(githubUrl);
-      if (githubRes.ok) return await githubRes.json();
+      const githubRes = await fetch(githubUrl, { signal: controller.signal });
+      if (githubRes.ok) {
+        clearTimeout(timeoutId);
+        return await githubRes.json();
+      }
     }
     
+    clearTimeout(timeoutId);
     return MOCK_DATA;
   } catch (error) {
-    console.warn('Sync failed, using defaults:', error);
+    console.warn('Network sync timed out or failed, using defaults:', error);
+    clearTimeout(timeoutId);
     return MOCK_DATA;
   }
 };
