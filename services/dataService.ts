@@ -5,8 +5,8 @@ import { getGitHubConfig } from './githubService.ts';
 
 export const fetchAppData = async (): Promise<AppData> => {
   try {
-    // 1. Try fetching from the local root (for development)
-    const localRes = await fetch('/tournaments.json');
+    // 1. Use relative path './' to ensure it works in subdirectories on GitHub Pages
+    const localRes = await fetch('./tournaments.json');
     if (localRes.ok) return await localRes.json();
     
     // 2. Try fetching from the configured GitHub repository
